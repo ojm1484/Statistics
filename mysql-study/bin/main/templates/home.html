@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<style type = "text/css">
+
+table.type02 {
+	border-collapse: separate;
+	border-spacing: 0;
+	text-align: center;
+	line-height: 1.5;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	margin: 20px 20px;
+	width: 97%; 
+}
+
+table.type02 th {
+	width: 30px;
+	padding: 10px;
+	font-weight: bold;
+	vertical-align: top;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #fff;
+	border-left: 1px solid #fff;
+	background: #eee;
+}
+
+table.type02 td {
+	width: 350px;
+	padding: 10px;
+	text-align: left;
+	vertical-align: top;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+
+table.type01 {
+	border-collapse: separate;
+	border-spacing: 0;
+	text-align: center;
+	line-height: 1.5;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	margin: 20px 20px;
+	width: 97%; 
+}
+
+table.type01 th {
+	width: 150px;
+	padding: 10px;
+	font-weight: bold;
+	vertical-align: top;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #fff;
+	border-left: 1px solid #fff;
+	background: #eee;
+}
+
+table.type01 td {
+	width: 350px;
+	padding: 10px;
+	vertical-align: top;
+	border-right: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+body
+{
+ text-align: center;
+ margin: 0 auto;
+}
+#Progress_Loading
+{
+ position: absolute;
+ left: 50%;
+ top: 50%;
+ background: #ffffff;
+}
+</style>
+<!-- 첫번째 home.html -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script th:inline="javascript">
+$(document).ready(function(){
+	
+	   $('#Progress_Loading').hide(); //첫 시작시 로딩바를 숨겨준다.
+	})
+	.ajaxStart(function(){
+		$('#Progress_Loading').show(); //ajax실행시 로딩바를 보여준다.
+	})
+	.ajaxStop(function(){
+		$('#Progress_Loading').hide(); //ajax종료시 로딩바를 숨겨준다.
+	});
+$(document).ready(function() {
+	
+	var today = new Date();
+	today = today.toISOString().substring(0, 10);
+	$("#endday").val(today);//endday가 두번째 input box 이면서 오늘 날짜를 담는다.
+	
+    $.datepicker.setDefaults($.datepicker.regional['ko']);
+    // Datepicker
+    $(".datepicker").datepicker({ 
+    	
+        showButtonPanel: true,
+        dateFormat: "yy-mm-dd",
+        maxDate:0,
+        onClose : function ( selectedDate ) {
+            var eleId = $(this).attr("id");
+            var optionName = "";
+            if(eleId.indexOf("StartDate") > 0) {
+            	 eleId = eleId.replace("EndDate", "StartDate");
+                 optionName = "maxDate";
+            }
+            $("#"+eleId).datepicker( "option", optionName, selectedDate );
+            $(".searchDate").find(".chkbox2").removeClass("on");
+        }
+    });
+
+
+	$(".dateclick").dateclick();    // DateClick
+	
+	var company = '0';
+	$('#companySelect').change(function(){
+		company = $('#companySelect option:selected').val();
+		console.log(company);
+	});
+	
+	$("#callOrder").click(function(){
+		var start = $("#startday").val();
+		var end = $("#endday").val();
+		var companyno = $("#companySelect option:selected").val();
+		console.log(start + " " + end+" "+companyno);
+		var date1 = new Date(start);
+    	var date2 = new Date(end);
+    	
+    	var diff = Math.abs((date2 - date1) / (1000 * 3600 * 24));
+		if( diff > 90) {
+					alert('조회기간은 90일 미만으로 가능합니다')
+					$("#dataList").css("display", "none");	
+				}
+		if (date1 > date2){
+			alert('시작일을 확인해주세요');
+			$("#dataList").css("display", "none");	
+		}
+		
+			$.ajax({
+				url:"/order",
+				method: "GET",
+				data:{
+					start: start,
+					end: end,
+					companyno: companyno
+				},
+				success : function(data) {
+					var resultListHTML = ""; 
+					var resultList = data.order;
+					var priceSum = data.priceSum;
+					console.log(priceSum);
+					var discountSum = data.discountSum;
+					var lastpaySum = data.lastpaySum;
+					
+					resultListHTML += "<table class='type01'>"
+					resultListHTML += "	<tr>"
+					resultListHTML += "		<th>날짜</th>"
+					resultListHTML += "		<th>상품금액</th>"
+					resultListHTML += "		<th>할인금액</th>"
+					resultListHTML += "		<th>결제금액</th>"
+					resultListHTML += "	</tr>"
+					
+					if(resultList.length>=1){
+						
+						for(var i = 0; i < resultList.length; i++) {
+							resultListHTML += "<td id='td_orderDate_" + i + "'>";
+							
+							var vsOrderDate1 = resultList[i].orddt.substring(0,4); 
+							var vsOrderDate2 = resultList[i].orddt.substring(4,2); 
+							var vsOrderDate3 = resultList[i].orddt.substring(6,2); 
+							var vsOrderDateResult =  vsOrderDate1 +"-" + vsOrderDate2 + "-" + vsOrderDate3;
+							
+							resultListHTML += resultList[i].orddt;
+							resultListHTML += "</td>";
+							
+							resultListHTML += "<td id='td_price_" + i + "'>";
+							var vsPrice = resultList[i].price;
+							resultListHTML += vsPrice;
+							resultListHTML += "원</td>";
+							
+							resultListHTML += "<td id='td_discount_" + i + "'>";
+							resultListHTML += resultList[i].discount;
+							resultListHTML += "원</td>";
+							
+							resultListHTML += "<td id='td_total_" + i + "'>";
+							resultListHTML += resultList[i].lastpay;
+							resultListHTML += "원</td>";
+							
+							resultListHTML += "</tr>";
+						}
+						
+						resultListHTML += "<tr style='background: #eee;' id='sum'>"
+						resultListHTML += "	<td>합계</td>"
+						
+						resultListHTML += "<td>"
+						var pricesum = priceSum;
+						pricesum = pricesum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+						resultListHTML += pricesum;
+						resultListHTML += "원</td>"
+						
+						resultListHTML += "<td>"
+						var discountsum = discountSum;
+						discountsum = discountsum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+						resultListHTML += discountsum;
+						resultListHTML += "원</td>"
+						
+						resultListHTML += "<td>"
+						var lastpaysum = lastpaySum;
+						lastpaysum = lastpaysum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
+						resultListHTML += lastpaysum;
+						resultListHTML += "원</td>"
+						
+						resultListHTML += "</tr>"
+						resultListHTML += "</table>"
+						}else{
+							resultListHTML += "<tr>"
+							resultListHTML += "	<td colspan='4'>통계 데이터가 없습니다.</td>"
+							resultListHTML += "</tr>"
+						}
+					$("#dataListDiv").html(resultListHTML);
+					
+					$("#dataListDiv").css("display", "block");
+			}
+		});
+	});
+});
+
+// DateClick
+jQuery.fn.dateclick = function(){
+    var $obj = $(this);
+    $obj.click(function(){
+        $(this).parent().find("input").focus();
+    });
+}
+
+function setSearchDate(start){
+    var num = start.substring(0,1);
+    var str = start.substring(1,2);
+    var today = new Date();
+    //var year = today.getFullYear();
+    //var month = today.getMonth() + 1;
+    //var day = today.getDate();
+    var endDate = $.datepicker.formatDate('yy-mm-dd', today);
+    $('#endday').val(endDate);
+    if(str == 'd'){
+        today.setDate(today.getDate() - num);
+    }else if (str == 'w'){
+        today.setDate(today.getDate() - (num*7));
+    }else if (str == 'm'){
+        today.setMonth(today.getMonth() - num);
+        today.setDate(today.getDate() + 1);
+        
+    }
+    
+    var startDate = $.datepicker.formatDate('yy-mm-dd', today);
+    $('#startday').val(startDate);
+    $("#endday").datepicker( "option", "minDate", startDate );
+    $("#startday").datepicker( "option", "maxDate", endDate );
+}
+
+
+</script>
+</head>
+
+<body>
+	<div>
+		<div id = "Progress_Loading"><!-- 로딩바 -->
+			<img src="Progress_Loading.gif"/>
+		</div>
+			<form name="form1">
+				<div>
+					<div>
+						<div>
+							<table class="type02">
+								<tr>
+									<th scope="row">기간</th>
+									<td>
+										<div class="clearfix">
+											<span class="dset"> 
+												<input type="text" class="datepicker inpType" id="startday" name="startday" readonly> 
+												<a href="#none" class="btncalendar dateclick"></a>
+											</span> 
+											<span class="demi">~</span>
+											<span class="dset">
+											  <input type="text" class="datepicker inpType" id="endday" name="endday" readonly>
+												<a href="#none" class="btncalendar dateclick"></a>
+											</span> 
+											  <input type="button" name="dateType" id="dateType1" class="btn btn-default btn-sm" onclick="setSearchDate('d')" value="당일" />
+											  <input type="button" name="dateType"  id="dateType2" class="btn btn-default btn-sm" onclick="setSearchDate('7d')" value="7일" />
+											  <input type="button" name="dateType" id="dateType4" class="btn btn-default btn-sm" onclick="setSearchDate('1m')" value="1개월" />
+											  <input type="button" name="dateType"  id="dateType5" class="btn btn-default btn-sm" onclick="setSearchDate('3m')" value="3개월" />
+										</div>
+									</td>
+								</tr>
+	
+								<tr>
+									<th scope="row">제휴사</th>
+									<td>
+										<select name="selbox" id="companySelect">
+											<option name="all" id="all" value="0">전체</option>
+											<option th:each="c:${company}" th:value="${c.companyno}" th:text="${c.companynm}"></option>
+										</select>
+									</td>
+								</tr>
+							</table>
+						</div>
+						<div style="text-align: center;">
+							<input type="button" style="display: inline-block;" id="callOrder" value="조회">
+						</div>
+						<div id="dataListDiv"></div>
+					</div>
+				</div>
+			</form>
+	</div>
+</body>
+</html>

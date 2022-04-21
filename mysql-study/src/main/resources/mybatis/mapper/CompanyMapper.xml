@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="hello.mysql.repository.CompanyRepository">
+<!--     <select id="selectAll" resultType="hello.mysql.domain.Company">
+        SELECT * FROM employee
+    </select>
+    <select id="select" resultType="hello.mysql.domain.Company">
+	  SELECT * FROM employee WHERE ID = #{id} and #{name}
+	</select> -->
+	<select id = "selectAll" resultType="hello.mysql.domain.Company">
+		select * from aton_company
+	</select>
+</mapper>

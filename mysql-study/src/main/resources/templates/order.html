@@ -1,0 +1,24 @@
+<meta charset="UTF-8">
+<table class="type01" id="table">
+	<tr class="trn">
+		<th id="orddt" name="orddt">일자</th>
+		<th id="price" name="price">상품금액</th>
+		<th id="discount" name="discount">할인금액</th>
+		<th id="lastpay" name="lastpay">결제금액</th>
+	</tr>
+	<tr class="trn" th:each="o:${order}">
+		<td th:text="${o.orddt}"></td>
+		<td th:text="${o.price}+'원'"></td>
+		<td th:text="${o.discount}+'원'"></td>
+		<td th:text="${o.lastpay}+'원'"></td>
+	</tr>
+	
+<tr>
+		<td >합계</td>
+		<td th:text= "${#numbers.formatInteger(price, 0, 'COMMA')+'원'}"></td>
+		<td th:text= "${#numbers.formatInteger(discount, 0, 'COMMA')+'원'}"></td>
+		<td th:text= "${#numbers.formatInteger(lastpay, 0, 'COMMA')+'원'}"></td>
+
+	</tr>
+</table>
+				

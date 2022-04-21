@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="hello.mysql.repository.OrderRepository">
+	<!-- 첫번째 페이지의 첫번째 표를 위한 퀴리 -->
+	<select id = "selectAllCompany" resultType="hello.mysql.domain.Company">
+		SELECT
+		 	companyno, companynm
+		FROM
+		 	aton_company
+	</select>
+	
+	<!-- 첫번째 페이지의 두번째 표를 위한 퀴리 -->
+	<select id="selectAll" resultType="hello.mysql.domain.Order">
+		SELECT 
+			DATE_FORMAT(ao.orddt,'%Y-%m-%d') as orddt, 
+			format(sum(price),N'#,0') as price,
+			format(sum((discount+coupon)),N'#,0') as discount,
+			format(sum((CAST((price * ea) as SIGNED) - CAST((discount + coupon) as SIGNED))),N'#,0') as lastpay
+            
+		FROM 
+			aton_order_goods aog 
+		LEFT JOIN
+			aton_order ao
+		ON	
+			ao.ordno = aog.ordno
+		where 	
+	
+		ao.orddt <![CDATA[ >= ]]> #{start} AND 
+		ao.orddt <![CDATA[ <= ]]> #{end} AND
+		istep <![CDATA[ >= ]]> 1 AND 
+		istep <![CDATA[ <= ]]> 4
+        <!-- 부등호를 쓰기 위한 cdata -->
+    
+    <if test = "companyno!=0">
+    	AND companyno = #{companyno}
+    
+    </if>
+		GROUP BY 
+			date_format(ao.orddt,'%Y-%m-%d');
+	</select>
+	<!-- 두번째 페이지를 위한 퀴리 -->
+	<select id="selectMonth" resultType="hello.mysql.domain.Month">
+		SELECT
+			companynm,
+			sum(price) as price,
+			sum(discount+coupon) as discount,
+			sum((CAST((price * ea) as SIGNED) - CAST((discount + coupon) as SIGNED))) as lastpay        
+		FROM 
+			aton_order_goods aog 
+		LEFT JOIN
+			aton_order ao
+		ON	
+			aog.ordno = ao.ordno
+		LEFT JOIN
+			aton_company ac
+		ON 
+			aog.companyno = ac.companyno
+		where 	
+		
+			orddt <![CDATA[ >= ]]> #{year} AND
+			orddt <![CDATA[ <= ]]> #{month} AND
+			istep <![CDATA[ >= ]]> 1 AND
+			istep <![CDATA[ <= ]]> 4	
+			
+		GROUP BY
+			companynm;
+	</select>
+	
+	<!-- 팝업페이지의 첫번째 표를 위한 쿼리 -->
+	<select id="selectCompany" resultType="hello.mysql.domain.Fees">
+       SELECT 
+			format(sum(price),N'#,0') as price,
+			format(sum(discount+coupon),N'#,0') as discount,
+			format(sum((CAST((price * ea) as SIGNED) - CAST((discount + coupon) as SIGNED))),N'#,0') as lastpay,
+            format(sum((CAST((price * ea) as SIGNED) - CAST((discount + coupon) as SIGNED))) * (0.01* feerate) ,N'#,0')  as fees
+		FROM 
+			aton_order_goods aog 
+		LEFT JOIN
+			aton_order ao
+		ON	
+			aog.ordno = ao.ordno
+		LEFT JOIN
+			aton_company ac
+		ON 
+			aog.companyno = ac.companyno
+		WHERE 
+		
+			ao.orddt <![CDATA[ >= ]]> #{year} AND
+			ao.orddt <![CDATA[ <= ]]> #{month} AND
+			istep <![CDATA[ >= ]]> 1  AND
+			istep <![CDATA[ <= ]]> 4 AND
+			ac.companynm = #{companynm};		
+			
+	</select>
+	
+	<!-- 팝업페이지의 두번째 표를 위한 쿼리 -->
+	<select id="selectProduct" resultType="hello.mysql.domain.Product">
+     	SELECT 
+			goodsno,
+			format(sum(price),N'#,0') as price,
+			format(sum(discount),N'#,0') as discount,
+			format(sum(CAST((price * ea) as SIGNED) - CAST((discount + coupon) as SIGNED)),N'#,0') as lastpay
+
+		FROM 
+			aton_order_goods aog 
+		LEFT JOIN
+			aton_order ao
+		ON	
+			aog.ordno = ao.ordno
+		LEFT JOIN
+			aton_company ac
+		ON 
+			aog.companyno = ac.companyno
+		WHERE 
+		
+			ao.orddt <![CDATA[ >= ]]> #{year} AND
+			ao.orddt <![CDATA[ <= ]]> #{month} AND
+			istep <![CDATA[ >= ]]> 1 AND
+			istep <![CDATA[ <= ]]> 4 AND
+			ac.companynm <![CDATA[ = ]]> #{companynm}		
+				
+		GROUP BY
+			goodsno
+		ORDER BY
+			goodsno;
+	</select>
+</mapper>

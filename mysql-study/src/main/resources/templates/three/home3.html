@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<!-- HTML 4.01 : <meta http-equiv="content-type" content="text/html; charset=UTF-8"> -->
+	<title>Insert title here</title>
+
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+	<style>
+		table.type02 {
+			border-collapse: separate;
+			border-spacing: 0;
+			text-align: center;
+			line-height: 1.5;
+			border-top: 1px solid #ccc;
+			border-left: 1px solid #ccc;
+			margin: 20px 10px;
+			width: 97%;
+		}
+
+		table.type02 th {
+			width: 100px;
+			padding: 10px;
+			font-weight: bold;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			border-top: 1px solid #fff;
+			border-left: 1px solid #fff;
+			background: #eee;
+		}
+
+		table.type02 td {
+			width: 350px;
+			padding: 10px;
+			text-align: left;
+			vertical-align: top;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+		}
+
+		table.type01 {
+			border-collapse: separate;
+			border-spacing: 0;
+			text-align: center;
+			line-height: 1.5;
+			border-top: 1px solid #ccc;
+			border-left: 1px solid #ccc;
+			margin: 20px 10px;
+			width: 97%;
+		}
+
+		table.type01 th {
+			width: 150px;
+			padding: 10px;
+			font-weight: bold;
+			vertical-align: top;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			border-top: 1px solid #fff;
+			border-left: 1px solid #fff;
+			background: #eee;
+		}
+
+		table.type01 td {
+			width: 350px;
+			padding: 10px;
+			vertical-align: top;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+		}
+
+		table.sum {
+			width: 350px;
+			padding: 10px;
+			vertical-align: top;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			background: #eee;
+		}
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+	<script th:inline="javascript">
+
+	</script>
+</head>
+
+<body>
+	<div id="dataList">
+		<form name="form1">
+			<div>
+				<div>
+					<div>
+						<table class="type02">
+							<tr>
+								<th scope="row" colspan="2" th:text="${yearMonth}+' '+${companynm}+' '+'통계'"></th>
+							</tr>
+
+							<tr th:each="f:${feeList}">
+								<th scope="row">상품금액</th>
+								<td th:text="${f.price}+'원'"></td>
+							</tr>
+
+							<tr th:each="f:${feeList}">
+								<th scope="row">할인금액</th>
+								<td th:text="${f.discount}+'원'"></td>
+							</tr>
+							<tr th:each="f:${feeList}">
+								<th scope="row">결제금액</th>
+								<td th:text="${f.lastpay}+'원'"></td>
+							</tr>
+							<tr th:each="f:${feeList}">
+								<th scope="row">제휴사수수료</th>
+								<td th:text="${f.fees}+'원'"></td>
+							</tr>
+						</table>
+					</div>
+					<div id="dataListDiv">
+						<h2>[판매상품]</h2>
+						<hr>
+					</div>
+					<table class="type01">
+						<tr class="trn">
+							<th id="goodsno" name="goodsno">상품번호</th>
+							<th id="price" name="price">상품금액</th>
+							<th id="discount" name="discount">할인금액</th>
+							<th id="lastpay" name="lastpay">결제금액</th>
+						</tr>
+						
+						<tr class="trn" th:each="p:${productList}">
+							<td th:text="${p.goodsno}"></td>
+							<td th:text="${p.price}+'원'"></td>
+							<td th:text="${p.discount}+'원'"></td>
+							<td th:text="${p.lastpay}+'원'"></td>
+						</tr>
+						<tr style='background: #eee;'>
+							<td>합계</td>
+							<td th:text= "${#numbers.formatInteger(priceSum, 0, 'COMMA')+'원'}"></td>
+							<td th:text= "${#numbers.formatInteger(discountSum, 0, 'COMMA')+'원'}"></td>
+							<td th:text= "${#numbers.formatInteger(lastpaySum, 0, 'COMMA')+'원'}"></td>
+					</table>
+
+					<div style="text-align: center;">
+						<input type="button" style="display: inline-block;" onclick="window.close();" value="닫기">
+					</div>
+
+				</div>
+			</div>
+		</form>
+	</div>
+</body>
+</html>
