@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="../css/style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script>
+$(document).ready(function(){
+	$("#callRegist").click(function(){
+		form1.action="/registForm";
+		form1.method="get";
+		form1.submit();
+	});
+});
+</script>
+</head>
+<body>
+<form name="form1">
+<div>
+<!-- 사이드바 -->
+ <div class="left-side-bar">
+        <div class="status-ico">
+            <span>▶</span>
+            <span>▼</span>
+        </div>
+		<div>
+		관리목록
+		</div>
+        <ul>
+            <li>
+                <a href="/two/home">통계데이터관리</a>
+            </li>
+            <li>
+                <a href="/companyList">제휴사 사이트 관리</a>
+                <ul>
+                	<li><a href="/companySearch">제휴사 사이트 관리 버전2</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+<!-- 사이드바end -->
+
+		<h2>사이트 목록</h2>
+			<input type="button" value="등록" id="callRegist">
+			<table class="type02">
+				<tr>
+					<th scope="row">NO</th>
+					<th scope="row">사이트명</th>
+					<th scope="row">제휴사명</th>
+					<th scope="row">상태</th>
+					<th scope="row">정산여부</th>
+					<th scope="row">등록일자</th>
+					<th scope="row">등록자</th>
+				</tr>
+
+				<tr th:each = "c:${companyTables}">
+					<td>
+						<!-- <input type="hidden" th:value="${c.siteId}" > -->
+						<a th:value="${c.siteId}" th:text="${c.siteId}" th:href="@{/detail(siteId=${c.siteId})}"></a>
+					</td>
+					<td th:text="${c.siteName}"></td>
+					<td th:text="${c.companynm}"></td>
+					<th:block th:switch="${c.siteStatus}">
+						<td th:case="00">정상</td>
+						<td th:case="01">중지</td>
+						<td th:case="02">준비중</td>
+					</th:block>	
+					<td th:text="${c.siteCalculate}"></td>
+					<td th:text="${c.siteRegDTTM}"></td>				
+					<!-- <td th:text="${#strings.substring(#dates.format(c.siteRegDTTM,'YYYYDDMM'),0, 8)}"></td> -->
+					<td th:text="${c.siteRegUser}"></td>
+				</tr>
+			</table>
+	</div>
+</form>
+</body>
+</html>

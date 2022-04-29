@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="../css/style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script>
+// var status =  "[[${companyTable.siteStatus}]]";
+var Serial = $("#form1").serialize();
+
+$(document).ready(function(){
+	$('#statusSelect').change(function(){
+		var status = $('#statusSelect option:selected').text();
+		console.log(status);
+	});
+	
+	$("#update").click(function(){
+		var [siteProtocol, siteUrlDetail] = $("#siteUrlDetail").val().split("://");
+		var siteUrlDetail2 = $("#siteProtocol").val(siteProtocol);
+		var siteProtocol1  = $("#siteUrlDetail").val(siteUrlDetail);
+		if(confirm("수정하시겠습니까?")){
+			$.ajax({
+				url:"/updateForm",
+				method:"post",
+				data:Serial,
+				success:function(result){
+					if(result="0000"){
+					}else if(result="9999"){
+						alert("정보를 확인해주세요");
+					}
+					alert("수정되었습니다.");
+				location.href="/companyList"
+				}
+			});
+ 	}
+});
+	
+	$("#delete").click(function(){
+		var siteId = $("#siteId").val();
+		if(confirm("삭제하시겠습니까??")){
+			$.ajax({
+				url:"/delete",
+				method:"post",
+				data: {
+					siteId: $("#siteId").val()
+				},
+				success:function(result){
+					if(result="0000"){
+					}else if(result="9999"){
+						alert("정보를 확인해주세요");
+					}
+					alert("삭제되었습니다.");
+				location.href="/companyList"
+				}
+			});
+	 	}
+	});
+// 	$("#statusSelect").val(status).attr("selected", "selected");
+});
+</script>
+</head>
+<body>
+<form name="form2" id="form2">
+<input type="hidden" name="siteId" id="siteId" th:value="${companyTable.siteId}" />
+</form>
+<form name="form1" id="form1">
+<input type="hidden" name="companynm" />
+<div>
+		<h2>상세정보</h2>
+			<table class="type01">
+				<tr>
+					<th scope="row">제휴사</th>
+					<td th:text="${companyTable.companynm}">
+					</td>
+				</tr>	
+				<tr>
+					<th scope="row">사이트명</th>
+						<td>
+							<input type="text" name="siteName" th:value="${companyTable.siteName}"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트상태</th>
+						<td>
+							<select name="siteStatus" id="statusSelect" th:value="${companyTable.siteStatus}">
+								<option value="00" th:selected="${companyTable.siteStatus}=='00'" >정상</option>
+								<option value="01" th:selected="${companyTable.siteStatus}=='01'" >중지</option>
+								<option value="02" th:selected="${companyTable.siteStatus}=='02'" >준비중</option>
+							</select>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">정산여부</th>
+						<td>
+							<input type="radio" name="siteCalculate" th:value="${companyTable.siteCalculate}" th:checked="${companyTable.siteCalculate}=='N'" value="N"/>N
+							<input type="radio" name="siteCalculate" th:value="${companyTable.siteCalculate}" th:checked="${companyTable.siteCalculate}=='Y'" value="Y"/>Y
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트URL</th>
+						<td>
+							<input type="text" name="siteUrlDetail" th:value="${companyTable.siteProtocol}+'://'+${companyTable.siteUrlDetail}"  id="siteUrlDetail"/>
+							<input type="hidden" name="siteProtocol" id="siteProtocol"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트 담당자</th>
+						<td>
+							<input type="text" name="siteManagerName" th:value="${companyTable.siteManagerName}"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">담당자 연락처</th>
+						<td>
+							<input type="text" name="siteManagerNumber" th:value="${companyTable.siteManagerNumber}"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">담당자 이메일</th>
+						<td>
+							<input type="text" name="siteManagerEmail" th:value="${companyTable.siteManagerEmail}"/>
+						</td>
+				</tr>
+			</table>
+		<div>
+			<input type="button" value="수정" id="update">
+			<input type="button" value="삭제" id="delete">
+		</div>
+	</div>
+</form>
+</body>
+</html>

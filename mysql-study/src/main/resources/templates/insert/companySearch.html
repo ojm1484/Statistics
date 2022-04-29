@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<!-- 검색조건 넣어서 띄우는 html -->
+<title>Insert title here</title>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="../css/style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script th:inline="javascript">
+$(document).ready(function(){
+	$(document).ready(function() {
+		
+		var today = new Date();
+		today = today.toISOString().substring(0, 10);
+		$("#endday").val(today);//endday가 두번째 input box 이면서 오늘 날짜를 담는다.
+		
+	    $.datepicker.setDefaults({ 
+	    	closeText: "닫기", currentText: "오늘", prevText: '이전 달',
+	    	nextText: '다음 달', monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+	    	monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+	    	dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+	    	dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+	    	dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
+	    	weekHeader: "주",
+	    	yearSuffix: '년' 
+	    	});
+
+	    // Datepicker
+	    //날짜 설정
+	    $(".datepicker").datepicker({ 
+	    	
+	        showButtonPanel: true,
+	        dateFormat: "yy-mm-dd",
+	        maxDate:0,
+	        onClose : function ( selectedDate ) {
+	            var eleId = $(this).attr("id");
+	            var optionName = "";
+	            if(eleId.indexOf("StartDate") > 0) {
+	            	 eleId = eleId.replace("EndDate", "StartDate");
+	                 optionName = "maxDate";
+	            }
+	            $("#"+eleId).datepicker( "option", optionName, selectedDate );
+	            $(".searchDate").find(".chkbox2").removeClass("on");
+	        }
+	    });
+
+
+		$(".dateclick").dateclick();    // DateClick
+		
+		var company = '0'; //전체 선택의 value값이 0으로 설정
+		$('#companySelect').change(function(){
+			company = $('#companySelect option:selected').val();
+			console.log(company);
+		});
+		
+		$("#callOrder").click(function(){ //조회버튼 누를 때 실행
+			var [siteProtocol, siteUrlDetail] = $("#siteUrl").val().split("://");
+			var siteProtocol1  = $("#siteUrlDetail").val(siteUrlDetail);
+			var siteUrlDetail2 = $("#siteProtocol").val(siteProtocol);
+			
+			var start = $("#startday").val();
+			var end = $("#endday").val();
+			console.log(start + " " + end+" ");
+	    	
+			if(start == "" || end == '' ){
+				console.log("공백값입니다." );
+				alert("날짜를 입력해주세요");
+			}else{
+			var searchSerial = $("#form1").serialize();
+				$.ajax({
+					url:"/companySearchList",
+					method: "post",
+					data: searchSerial,
+					success : function(data) {
+						
+ 						var companyTable = data.companyTables;				
+					$('#dataListDiv').html(data);
+					},
+				});
+			}
+		});
+	});
+
+	// DateClick
+	jQuery.fn.dateclick = function(){
+	    var $obj = $(this);
+	    $obj.click(function(){
+	        $(this).parent().find("input").focus();
+	    });
+	}
+	
+	$("#callList").click(function(){
+		$(location).attr("href", "/companyList")
+	});
+});
+</script>
+</head>
+<body>
+<form name="form1" id="form1">
+<!-- 사이드바 -->
+ <div class="left-side-bar">
+        <div class="status-ico">
+            <span>▶</span>
+            <span>▼</span>
+        </div>
+		<div>
+		관리목록
+		</div>
+        <ul>
+            <li>
+                <a href="/two/home">통계데이터관리</a>
+            </li>
+            <li>
+                <a href="/companyList">제휴사 사이트 관리</a>
+                <ul>
+                	<li><a href="/companySearch">제휴사 사이트 관리 버전2</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+<!-- 사이드바end -->
+				<div>
+					<div>
+						<div>
+						<h2>사이트 목록</h2>
+							<table class="type01">
+							<tr>
+								<th scope="row">제휴사</th>
+								<td>
+									<select name="companynm" id="companySelect">
+										<option  th:each="c:${company}" th:value="${c.companynm}" th:text="${c.companynm}"></option>
+									</select>
+								</td>
+							</tr>	
+							<tr>
+								<th scope="row">사이트명</th>
+									<td>
+										<input type="text" name="siteName" id="siteName" />
+									</td>
+							</tr>
+							<tr>
+								<th scope="row">사이트상태</th>
+									<td>
+										<select name="siteStatus" id="statusSelect">
+											<option value="00">정상</option>
+											<option value="01">중지</option>
+											<option value="02">준비중</option>
+										</select>
+									</td>
+							</tr>
+							<tr>
+								<th scope="row">정산여부</th>
+									<td>
+										<input type="radio" name="siteCalculate" value="N"/>N
+										<input type="radio" name="siteCalculate" value="Y"/>Y
+									</td>
+							</tr>
+							<tr>
+								<th scope="row">사이트URL</th>
+									<td>
+										<input type="text" name="siteUrl" id="siteUrl"/>
+										<input type="hidden" name="siteUrlDetail" id="siteUrlDetail"/>
+										<input type="hidden" name="siteProtocol" id="siteProtocol"/>
+									</td>
+							</tr>
+								<tr>
+									<th scope="row">등록일자</th>
+									<td>
+										<div class="clearfix">
+											<span class="dset"> 
+												<input type="text" class="datepicker inpType" id="startday" name="startday" > 
+												<a href="#none" class="btncalendar dateclick"></a>
+											</span> 
+											<span class="demi">~</span>
+											<span class="dset">
+											  <input type="text" class="datepicker inpType" id="endday" name="endday" >
+												<a href="#none" class="btncalendar dateclick"></a>
+											</span> 
+										</div>
+									</td>
+								</tr>
+	
+							</table>
+						</div>
+						<div style="text-align: center;">
+							<input type="button" style="display: inline-block;" id="callOrder" value="조회">
+							<input type="button" style="display: inline-block;" onClick="location.href='/registForm'" value="등록">
+						</div>
+						<div id="dataListDiv"></div>
+					</div>
+				</div>
+			</form>
+</body>
+</html>

@@ -3,88 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
-<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
-<style type = "text/css">
-
-table.type02 {
-	border-collapse: separate;
-	border-spacing: 0;
-	text-align: center;
-	line-height: 1.5;
-	border-top: 1px solid #ccc;
-	border-left: 1px solid #ccc;
-	margin: 20px 20px;
-	width: 97%; 
-}
-
-table.type02 th {
-	width: 30px;
-	padding: 10px;
-	font-weight: bold;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	border-top: 1px solid #fff;
-	border-left: 1px solid #fff;
-	background: #eee;
-}
-
-table.type02 td {
-	width: 350px;
-	padding: 10px;
-	text-align: left;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-}
-
-table.type01 {
-	border-collapse: separate;
-	border-spacing: 0;
-	text-align: center;
-	line-height: 1.5;
-	border-top: 1px solid #ccc;
-	border-left: 1px solid #ccc;
-	margin: 20px 20px;
-	width: 97%; 
-}
-
-table.type01 th {
-	width: 150px;
-	padding: 10px;
-	font-weight: bold;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	border-top: 1px solid #fff;
-	border-left: 1px solid #fff;
-	background: #eee;
-}
-
-table.type01 td {
-	width: 350px;
-	padding: 10px;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-}
-body
-{
- text-align: center;
- margin: 0 auto;
-}
-#Progress_Loading
-{
- position: absolute;
- left: 50%;
- top: 50%;
- background: #ffffff;
-}
-</style>
 <!-- 첫번째 home.html -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<link href="/css/style.css" rel="stylesheet">
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 <script th:inline="javascript">
 $(document).ready(function(){
 	
@@ -104,6 +28,7 @@ $(document).ready(function() {
 	
     $.datepicker.setDefaults($.datepicker.regional['ko']);
     // Datepicker
+    //날짜 설정
     $(".datepicker").datepicker({ 
     	
         showButtonPanel: true,
@@ -124,13 +49,13 @@ $(document).ready(function() {
 
 	$(".dateclick").dateclick();    // DateClick
 	
-	var company = '0';
+	var company = '0'; //전체 선택의 value값이 0으로 설정
 	$('#companySelect').change(function(){
 		company = $('#companySelect option:selected').val();
 		console.log(company);
 	});
 	
-	$("#callOrder").click(function(){
+	$("#callOrder").click(function(){ //조회버튼 누를 때 실행
 		var start = $("#startday").val();
 		var end = $("#endday").val();
 		var companyno = $("#companySelect option:selected").val();
@@ -148,12 +73,16 @@ $(document).ready(function() {
 			$("#dataList").css("display", "none");	
 		}
 		
+		if(start == "" || end == '' ){
+			console.log("공백값입니다." );
+			alert("날짜를 입력해주세요");
+		}else{
 			$.ajax({
 				url:"/order",
 				method: "GET",
 				data:{
-					start: start,
-					end: end,
+					start: start, //#startday
+					end: end,	//#endday
 					companyno: companyno
 				},
 				success : function(data) {
@@ -234,6 +163,11 @@ $(document).ready(function() {
 					$("#dataListDiv").css("display", "block");
 			}
 		});
+			
+		}
+		
+		
+			
 	});
 });
 
@@ -244,7 +178,7 @@ jQuery.fn.dateclick = function(){
         $(this).parent().find("input").focus();
     });
 }
-
+//시작날짜에서 당일, 7일...을 누르면 동작되는 함수
 function setSearchDate(start){
     var num = start.substring(0,1);
     var str = start.substring(1,2);
@@ -289,12 +223,12 @@ function setSearchDate(start){
 									<td>
 										<div class="clearfix">
 											<span class="dset"> 
-												<input type="text" class="datepicker inpType" id="startday" name="startday" readonly> 
+												<input type="text" class="datepicker inpType" id="startday" name="startday" > 
 												<a href="#none" class="btncalendar dateclick"></a>
 											</span> 
 											<span class="demi">~</span>
 											<span class="dset">
-											  <input type="text" class="datepicker inpType" id="endday" name="endday" readonly>
+											  <input type="text" class="datepicker inpType" id="endday" name="endday" >
 												<a href="#none" class="btncalendar dateclick"></a>
 											</span> 
 											  <input type="button" name="dateType" id="dateType1" class="btn btn-default btn-sm" onclick="setSearchDate('d')" value="당일" />

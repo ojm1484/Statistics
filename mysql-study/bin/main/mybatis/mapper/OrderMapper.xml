@@ -3,13 +3,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="hello.mysql.repository.OrderRepository">
+	<!-- 오늘 날자 -->
+	<select id = "selectDate" resultType="String">
+		SELECT date_format(now(), '%Y-%m-%d') as date;
+	</select>
+
 	<!-- 첫번째 페이지의 첫번째 표를 위한 퀴리 -->
 	<select id = "selectAllCompany" resultType="hello.mysql.domain.Company">
 		SELECT
 		 	companyno, companynm
 		FROM
 		 	aton_company
+		 
 	</select>
+	<!-- 제휴사 중복값체크 -->
+	<select id = "selectCompanynm" resultType="int">
+	<!-- 있을때 1로 반환 -->
+		select EXISTS (select * from aton_company where companynm = #{companynm} limit 1) as success
+	</select>
+	<!-- companyRegist --> 
+	<insert id = "companyRegist" parameterType="hello.mysql.domain.Company">
+		INSERT INTO
+		 	aton_company(companynm, feerate)
+		VALUES
+		 	(#{companynm},
+			#{feerate});
+	</insert>
 	
 	<!-- 첫번째 페이지의 두번째 표를 위한 퀴리 -->
 	<select id="selectAll" resultType="hello.mysql.domain.Order">
@@ -126,4 +145,129 @@
 		ORDER BY
 			goodsno;
 	</select>
+	<!-- /companyList를 위한 쿼리 -->
+	<select id="selectListCompany" resultType="hello.mysql.domain.CompanyTable">
+	SELECT
+		siteId,
+	    siteName,
+	    ac.companynm as companynm,
+	    siteStatus,
+	    siteCalculate,
+	    siteManagerName,
+	    siteManagerNumber,
+	    siteManagerEmail,
+	    date_format(siteRegDTTM, '%Y-%m-%d') as siteRegDTTM,
+	    siteRegUser
+	FROM 
+		aton_company_site acs
+	LEFT JOIN 
+		aton_company ac
+	ON
+		acs.companyId = ac.companyno
+	ORDER BY
+		siteId desc;
+	</select>
+	<!-- /companySearchList를 위한 쿼리 -->
+	<select id="selectSearchCompany" resultType="hello.mysql.domain.CompanyTable">
+    SELECT
+		siteId,
+	    siteName,
+	    ac.companynm as companynm,
+	    siteStatus,
+	    siteCalculate,
+	    siteProtocol,
+	    siteUrlDetail,
+	    siteManagerName,
+	    siteManagerNumber,
+	    siteManagerEmail,
+	    date_format(siteRegDTTM, '%Y-%m-%d') as siteRegDTTM,
+	    siteRegUser
+	FROM 
+		aton_company_site acs
+	LEFT JOIN 
+		aton_company ac
+	ON
+		acs.companyId = ac.companyno
+	WHERE
+		acs.siteName = #{siteName} and
+        ac.companynm = #{companynm} and
+        acs.siteStatus = #{siteStatus} and
+        acs.siteCalculate = #{siteCalculate} and
+        acs.siteRegDTTM <![CDATA[ >= ]]> #{start} and  acs.siteRegDTTM <![CDATA[ >= ]]> #{end} and
+        acs.siteProtocol = #{siteProtocol} and
+        acs.siteUrlDetail = #{siteUrlDetail} 
+	ORDER BY
+		siteId desc;
+	</select>
+	<!-- updateForm을 위한 쿼리 -->
+	<select id="selectOne" resultType="hello.mysql.domain.CompanyTable">
+	SELECT
+		siteId,
+	    siteName,
+	    ac.companynm as companynm,
+	    siteStatus,
+	    siteCalculate,
+	    siteProtocol,
+	    siteUrlDetail,
+	    siteManagerName,
+	    siteManagerNumber,
+	    siteManagerEmail
+	FROM 
+		aton_company_site acs
+	LEFT JOIN 
+		aton_company ac
+	ON
+		acs.companyId = ac.companyno
+	WHERE
+		acs.siteId = #{siteId};
+	</select>
+	<!-- registForm에서 등록하기 위한 쿼리 -->
+	<insert id="companyInsert" parameterType="hello.mysql.domain.CompanyTable">
+		INSERT INTO
+			aton_company_site(companyId,
+								siteType,
+								siteName,
+								siteStatus,
+								siteCalculate,
+								siteProtocol,
+								siteUrlDetail,
+								siteManagerName,
+								siteManagerNumber,
+								siteManagerEmail,
+								siteGearingUrl,
+								siteRegDTTM)
+								
+		VALUES
+				(#{companyId}, 
+				#{siteType},
+				#{siteName},
+				#{siteStatus},
+				#{siteCalculate},
+				#{siteProtocol},
+				#{siteUrlDetail},
+				#{siteManagerName},
+				#{siteManagerNumber},
+				#{siteManagerEmail},
+				#{siteGearingUrl},
+				date_format(now(), '%Y%m%d%H%i%s'));
+	</insert>
+	<!-- updateForm에서 수정을 위한 쿼리 -->
+	<update id="companyUpdate" parameterType="hello.mysql.domain.CompanyTable">
+		UPDATE
+			aton_company_site SET siteId=#{siteId},
+						   siteName=#{siteName},
+						   siteStatus=#{siteStatus}, 
+						   siteCalculate=#{siteCalculate},
+						   siteProtocol=#{siteProtocol}, 
+						   siteManagerName=#{siteManagerName}, 
+						   siteManagerNumber=#{siteManagerNumber}, 
+						   siteManagerEmail=#{siteManagerEmail}, 
+						   siteModDTTM=date_format(now(), '%Y%m%d%H%i%s')
+		WHERE siteId=#{siteId}
+	</update>
+	<!-- /updateForm에서 삭제를 하기 위한 쿼리 -->
+	<delete id="companyDelete" parameterType="hello.mysql.domain.CompanyTable">
+		DELETE FROM aton_company_site 
+		WHERE siteId=#{siteId}
+	</delete>
 </mapper>

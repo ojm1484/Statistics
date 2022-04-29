@@ -1,0 +1,30 @@
+<meta charset="UTF-8">
+			<table class="type02">
+				<tr>
+					<th scope="row">NO</th>
+					<th scope="row">사이트명</th>
+					<th scope="row">제휴사명</th>
+					<th scope="row">상태</th>
+					<th scope="row">정산여부</th>
+					<th scope="row">등록일자</th>
+					<th scope="row">등록자</th>
+				</tr>
+
+				<tr th:each = "c:${companyTables}">
+					<td>
+						<input type="hidden" th:value="${c.siteId}" >
+						<a th:value="${c.siteId}" th:text="${c.siteId}" th:href="@{/detail(siteId=${c.siteId})}"></a>
+					</td>
+					<td th:text="${c.siteName}"></td>
+					<td th:text="${c.companynm}"></td>
+					<th:block th:switch="${c.siteStatus}">
+						<td th:case="00">정상</td>
+						<td th:case="01">중지</td>
+						<td th:case="02">준비중</td>
+					</th:block>	
+					<td th:text="${c.siteCalculate}"></td>
+					<td th:text="${c.siteRegDTTM}"></td>				
+<!-- 					<td th:text="${#strings.substring(#dates.format(c.siteRegDTTM,'YYYYDDMM'),0, 8)}"></td> -->
+					<td th:text="${c.siteRegUser}"></td>
+				</tr>
+			</table>

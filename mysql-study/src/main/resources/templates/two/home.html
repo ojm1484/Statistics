@@ -4,274 +4,46 @@
 <meta charset="UTF-8">
 <!-- HTML 4.01 : <meta http-equiv="content-type" content="text/html; charset=UTF-8"> -->
 <title>Insert title here</title>
-
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
-<style>
-table.type02 {
-	border-collapse: separate;
-	border-spacing: 0;
-	text-align: center;
-	line-height: 1.5;
-	border-top: 1px solid #ccc;
-	border-left: 1px solid #ccc;
-	margin: 20px 20px;
-	width: 97%; 
-}
-
-table.type02 th {
-	width: 30px;
-	padding: 10px;
-	font-weight: bold;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	border-top: 1px solid #fff;
-	border-left: 1px solid #fff;
-	background: #eee;
-}
-
-table.type02 td {
-	width: 350px;
-	padding: 10px;
-	text-align: left;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-}
-
-table.type01 {
-	border-collapse: separate;
-	border-spacing: 0;
-	text-align: center;
-	line-height: 1.5;
-	border-top: 1px solid #ccc;
-	border-left: 1px solid #ccc;
-	margin: 20px 20px;
-	width: 97%; 
-}
-
-table.type01 th {
-	width: 150px;
-	padding: 10px;
-	font-weight: bold;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-	border-top: 1px solid #fff;
-	border-left: 1px solid #fff;
-	background: #eee;
-}
-
-table.type01 td {
-	width: 350px;
-	padding: 10px;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-}
-table.sum {
-	width: 350px;
-	padding: 10px;
-	vertical-align: top;
-	border-right: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
-		background: #eee;
-}
-body
-{
- text-align: center;
- margin: 0 auto;
-}
-#Progress_Loading
-{
- position: absolute;
- left: 50%;
- top: 50%;
- background: #ffffff;
-}
-</style>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="../css/style.css">
 <!-- two/home.html -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
- <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
 <script th:inline="javascript">
-var today = new Date();
-var year = today.toISOString().substring(0, 4);
+var year = /*[[${year}]]*/;
 console.log(year);
-var month = today.getMonth() + 1;
+var month = /*[[${month}]]*/;
 console.log(month);
-
-$(document).ready(function(){
-	
-	   $('#Progress_Loading').hide(); //첫 시작시 로딩바를 숨겨준다.
-	})
-	.ajaxStart(function(){
-		$('#Progress_Loading').show(); //ajax실행시 로딩바를 보여준다.
-	})
-	.ajaxStop(function(){
-		$('#Progress_Loading').hide(); //ajax종료시 로딩바를 숨겨준다.
-	});
-$(document).ready(function() {
-	currentMonthChange();
-
-	var lastYear = today.toISOString().substring(0, 4);
-	
-	for (var i = 2015; i <= lastYear; i++) {
-		if (i == lastYear) {
-			$('#yearSelect').append('<option selected>' + i + '</option>');
-		} else {
-			$('#yearSelect').append('<option>' + i + '</option>');
-		}
-	}
-		$('#yearSelect').change(function() {		
-		year = $('#yearSelect option:selected').val();
-		console.log(year);
-		
-		// 선택 연도가 올해보다 작으면 12로 하고, 똑같으면 존재하는 달까지만 나오게
-		if (year < lastYear) {
-			month = 12;
-			currentMonthChange();
-		} else if (year === lastYear) {
-			var month2 = new Date();
-			month2 = month2.toISOString().substring(6, 7);
-			month = month2;
-			currentMonthChange();
-		}
-	});
-	
-
-$("#callOrder").click(function(){
-	
-	var year = $("#yearSelect").val();
-	var month = $("#monthSelect").val();
-	console.log(year + " " + month+" ");
-	
-		$.ajax({
-			url : "/two/home2",
-			"method" : "get",
-			"data" : {
-				"year": year, //year값 = YYYY-MM-01
-				"month": month, //month값 = YYYY-MM-31
-			} ,
-			success : function(data) {
-				var resultListHTML = ""; 
-				var resultList = data.monthList;
-				//             = JSON.parse(data(컨트롤러에서 넘겨주는애));
-				//모델에 담지 않고 맵을 리스폰스바디로 넘겨줘서 json객체로 변환된다 그걸 뽑아주면 됨 
-				var priceSum = data.priceSum;
-				console.log(priceSum);
-				var discountSum = data.discountSum;
-				var lastpaySum = data.lastpaySum;
-				
-				
-				resultListHTML += "<table class='type01'>"
-				resultListHTML += "	<tr>"
-				resultListHTML += "		<th>제휴사</th>"
-				resultListHTML += "		<th>상품금액</th>"
-				resultListHTML += "		<th>할인금액</th>"
-				resultListHTML += "		<th>결제금액</th>"
-				resultListHTML += "	</tr>"
-				
-				if(resultList.length>=1){
-				
-				for(var i = 0; i < resultList.length; i++) {
-					resultListHTML += "<tr id='tr_" + i + "'>";
-					
-					resultListHTML += "<td id='td_companynm" + i + "' >";
-					resultListHTML += "<a href='javascript:popup("+i+")'>"+resultList[i].companynm+"</a>"
-					resultListHTML += "</td>";
-					
-					resultListHTML += "<td id='td_price_" + i + "'>";
-					var price = resultList[i].price;
-					price = price.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-					resultListHTML += price;
-					resultListHTML += "원</td>";
-					
-					resultListHTML += "<td id='td_discount_" + i + "'>";
-					var discount = resultList[i].discount;
-					discount = discount.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-					resultListHTML += discount;
-					resultListHTML += "원</td>";
-					
-					resultListHTML += "<td id='td_lastpay_" + i + "'>";
-					var lastpay = resultList[i].lastpay;
-					lastpay = lastpay.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-					resultListHTML += lastpay;
-					resultListHTML += "원</td>";
-					
-					resultListHTML += "</tr>";
-
-				}
-				resultListHTML += "<tr id='sum' style='background: #eee;'>"
-				resultListHTML += "<td>합계</td>"
-				
-				resultListHTML += "<td>"
-				var pricesum = priceSum;
-				pricesum = pricesum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-				resultListHTML += pricesum;
-				resultListHTML += "원</td>"
-				
-				resultListHTML += "<td>"
-				var discountsum = discountSum;
-				discountsum = discountsum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-				resultListHTML += discountsum;
-				resultListHTML += "원</td>"
-				
-				resultListHTML += "<td>"
-				var lastpaysum = lastpaySum;
-				lastpaysum = lastpaysum.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",")
-				resultListHTML += lastpaysum;
-				resultListHTML += "원</td>"
-				
-				resultListHTML += "</tr>"
-				resultListHTML += "</table>"
-					
-				}else{
-					resultListHTML += "<tr>"
-					resultListHTML += "	<td colspan='4'>통계 데이터가 없습니다.</td>"
-					resultListHTML += "</tr>"
-				}
-				 
-				$("#dataListDiv").html(resultListHTML);
-				
-				$("#dataListDiv").css("display", "block");
-				
-			}, error : function(data){
-				alert("실패");
-			}
-		});
-	});
-});
-function currentMonthChange(){
-		$("#monthSelect").empty();
-		
-		for(var i = 1; i<= month; i++){
-			if (i == month) {
-				$('#monthSelect').append('<option selected>'+i+'</option>');
-			} else {
-				$('#monthSelect').append('<option>'+i+'</option>');
-			}
-		}
-	}
-function popup(i){
-
-	//console.log(companynm)
-	var year = $('#yearSelect').val();
-	var month = $('#monthSelect').val();
-	var companynm = $('#td_companynm'+i).text();
-	
-    var url = "/three/home3?year="+year+"&month="+month+"&companynm="+companynm;
-    console.log(year+month+companynm);
-    var name = "popup test";
-    var option = "width = 800, height = 800, top = 100, left = 200, location = no"
-    
-    window.open(url, name, option);
-}
-
+var lastYear = /*[[${year}]]*/;
 </script>
+
+<script src="/script/script.js"></script>
+
 </head>
 <body>
 	<div id = "dataList">
+	<!-- 사이드바 -->
+ <div class="left-side-bar">
+        <div class="status-ico">
+            <span>▶</span>
+            <span>▼</span>
+        </div>
+		<div>
+		관리목록
+		</div>
+        <ul>
+            <li>
+                <a href="/two/home">통계데이터관리</a>
+            </li>
+            <li>
+                <a href="/companyList">제휴사 사이트 관리</a>
+            </li>
+        </ul>
+    </div>
+<!-- 사이드바end -->
 		<div id = "Progress_Loading"><!-- 로딩바 -->
 			<img src="/Progress_Loading.gif"/>
 		</div>

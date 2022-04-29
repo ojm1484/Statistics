@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="../css/style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script> 
+
+<script>
+var result = "[[${resultCode}]]";
+
+var insertSerial = $("#form1").serialize();
+console.log(insertSerial);
+
+$(document).ready(function(){
+
+	$('#companySelect').change(function(){
+		var company = $('#companySelect option:selected').val();
+		console.log(company);
+	});
+	$('tr[name="siteGearingUrl"]').hide();
+		$('input[name="siteType"]').change(function(){
+			var input = document.getElementById("siteName").value ='';
+			var siteUrl = document.getElementById("siteUrl").value ='';
+			var siteManagerName = document.getElementById("siteManagerName").value ='';
+			var siteManagerNumber = document.getElementById("siteManagerNumber").value ='';
+			var siteManagerEmail = document.getElementById("siteManagerEmail").value ='';
+			var siteGearingUrl = document.getElementById("siteGearingUrl").value ='';
+			$('input[name="siteCalculate"]').removeAttr('checked');
+			
+// 			var siteCalculate = document.getElementByName("siteCalculate");
+// 				siteCalculate.checked=false;
+			var siteType = $('input[name="siteType"]:checked').val();
+			if(siteType == "00"){
+				$('tr[name="siteGearingUrl"]').hide();
+				
+			}else if(siteType == "01"){
+				$('tr[name="siteGearingUrl"]').show();
+			}
+			
+			console.log(siteType);
+		});
+
+	$("#regist").click(function(){
+
+		var [siteProtocol, siteUrlDetail] = $("#siteUrl").val().split("://");
+		var siteProtocol1  = $("#siteUrlDetail").val(siteUrlDetail);
+		var siteUrlDetail2 = $("#siteProtocol").val(siteProtocol);
+		if (!regCheck()) {
+    		return;
+    	};
+
+		if(confirm("등록하시겠습니까?")){
+			var insertSerial = $("#form1").serialize();
+			
+			console.log(insertSerial);
+		     	$.ajax({
+		 		url:"/callRegist",
+		 		method:"post",
+		 		data:insertSerial,
+		 		success:function(result){
+			 			if(result="0000"){
+						}else if(result="9999"){
+							alert("정보를 확인해주세요");
+							return;
+						}
+						alert("등록되었습니다.");
+		 			location.href="/companyList"
+		 			}
+		 		});
+		}	
+	});
+
+	$("#cancle").click(function(){
+		popupClose();
+	});
+	$("#registCompany").click(function(){ //신규제휴사등록 버튼 누를 때 실행
+		var layerpop = ""; 
+			layerpop += "<form name='form2' id='form2'>"
+			layerpop += "<div style='height:1000px;'></div>"
+			layerpop += "<div id='mask'></div>"
+			layerpop += "<div id='layerbox' class='layerpop' style='width: 500px; height: 300px;'>"
+			layerpop += "	<article class='layerpop_area'>"
+			layerpop += "	<a href='javascript:popupClose();' class='layerpop_close' id='layerbox_close'><img src='../btn-exit-off.png' alt='btn-exit-off' style='width: 25px;' /></a><br>"
+			layerpop += "	<div class='content'>"
+			layerpop += "	신규제휴사등록"
+			layerpop += "	<div><input type='hidden' name='companyno' maxlength='30'></div>"
+			layerpop += "	<div><input type='text' name='companynm' id='companynm' placeholder='제휴사명을 입력해주세요' min='0' max='100'></div>"
+			layerpop += "	<div><input type='text' name='feerate' placeholder='수수료율 단위(%)'></div>"
+			layerpop += "	<div><input type='button' id='regcompany' value='등록' onclick='regCompany();'>"
+			layerpop += "	<input type='button' id='cancle' id='cancle' onClick='popupClose();' value='취소'>"
+			layerpop += "</div>"
+			layerpop += "</div>"
+			layerpop += "</article>"
+			layerpop += "</div>"
+			layerpop += "</form>"
+		$("#popup").append(layerpop);
+		popupOpen();
+	});
+	
+});//document.ready
+
+function regCompany() {
+	
+	
+// 	for(var i=0; i<companyname.length; i++){
+// 		var test =companyname[i].companynm;
+// 		if(test==("#companynm").val){
+// 			return alert('제휴사명이 중복됩니다.');
+// 		}
+		
+// 	}
+// 		if(companyname==("#companynm").val){
+// 			alert('제휴사명이 중복됩니다.');
+// 			return false;
+// 		}
+	if(confirm("등록하시겠습니까?")) {
+		var insertCompanySerial = $("#form2").serialize(); 
+		
+		$.ajax({
+			url:"/regCompany",
+			method:"post",
+			data:insertCompanySerial,
+			success:function(result){
+				var resultCode = result.resultCode;
+				console.log(resultCode);
+				
+				if(resultCode == "0000"){
+					 //화면이동을 줄이기 위해서 ajax를 많이 써야한다.
+				 	alert("등록되었습니다.");
+				 	return true;
+				}else if(resultCode == "9999") {
+					alert("정보를 확인해주세요");
+					return false;
+				} else if(resultCode == "5555") {
+					alert("이미 존재하는 제휴사입니다.");
+					return false;
+				}
+				location.href="/registForm"		
+			}
+		});
+ 	}
+}
+	  function popupOpen() {
+	        $('.layerpop').css("position", "absolute");
+	        //영역 가운에데 레이어를 뛰우기 위해 위치 계산 
+	        $('.layerpop').css("top",(($(window).height() - $('.layerpop').outerHeight()) / 2) + $(window).scrollTop());
+	        $('.layerpop').css("left",(($(window).width() - $('.layerpop').outerWidth()) / 2) + $(window).scrollLeft());
+	        $('.layerpop').draggable();
+	        $('#layerbox').show();
+	    }
+
+	    function popupClose() {
+	        $('#layerbox').hide();
+	        $('#mask').hide();
+	    }
+	    function regCheck(){
+	    	
+	    	var siteType = $('input[name="siteType"]:checked').val();
+	    	var url = $("#siteUrl");
+	    	var gearingurl = $("#siteGearingUrl");
+	    	var companySelect = $("#companySelect");
+	    	var siteName = $("#siteName");
+	    	var statusSelect = $("#statusSelect");
+	    	var siteCalculate = $("#siteCalculate");
+	    	var siteManagerName = $("#siteManagerName");
+	    	var siteManagerNumber = $("#siteManagerNumber");
+	    	var siteManagerEmail = $("#siteManagerEmail");
+	    	
+	    	var regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+	    	var reg = /^[0-9]+/g; //숫자만 입력하는 정규식
+	    	var nameJ = /^[가-힣]{2,6}$/; //이름에 특수문자 들어가지 않도록
+	    	// 이메일 검사 정규식
+	    	var mailJ = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+	    	// 휴대폰 번호 정규식
+	    	var phoneJ = /^01([0|1|6|7|8|9])([0-9]{3,4})([0-9]{4})$/;	
+	    	
+	    	if(siteName.val() == ""||
+	    	   siteName.val()==null){
+	    		alert("제휴사명을 입력하세요");
+	    		siteName.focus();
+	    		return false;
+	    	}
+	    	if(!nameJ.test(siteManagerName.val())||
+		    			siteManagerName.val()==""||
+		    			siteManagerName.val()==null){
+	    		alert("이름을 확인해주세요");
+	    		siteManagerName.focus();
+	    		return false;
+	    	}
+	    	if(!phoneJ.test(siteManagerNumber.val())||
+	    		  !reg.test(siteManagerNumber.val())||
+			    		 siteManagerNumber.val()==""||
+			    		siteManagerNumber.val()==null){
+	    		alert("번호를 확인해주세요");
+	    		siteManagerNumber.focus();
+	    		return false;
+	    	}
+	    	if(!mailJ.test(siteManagerEmail.val())||
+		    			siteManagerEmail.val()==""||
+		    			siteManagerEmail.val()==null){
+	    		alert("이메일을 확인해주세요");
+	    		siteManagerEmail.focus();
+	    		return false;
+	    	}
+	    	if(!regex.test(url.val())||
+		    			url.val()==""||
+		    			url.val()==null){
+	    		alert("사이트 URL을 확인해주세요");
+	    		url.focus();
+	    		return false;
+	    	}
+
+	    	if(siteType == "01"){
+	    		
+	    		if(!regex.test(gearingurl.val())||
+	    				gearingurl.val()==""||
+	    				gearingurl.val()==null ){
+	    			alert("연동 URL을 확인해주세요");
+	    			gearingurl.focus();
+	    			return false;
+	    		}
+	    	}
+			return true;
+	    }
+
+// function gearingCheck(){
+// 	var regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+// 	var gearingurl = $("#siteGearingUrl");
+// 	if(!regex.test(gearingurl.val())||
+// 			gearingurl.val()==""||
+// 			gearingurl.val()==null ){
+// 		alert("연동 URL을 확인해주세요");
+// 		gearingurl.focus();
+// 		return false;
+// 	}
+// 	return true;
+// };
+</script>
+</head>
+<body>
+<form name="form1" id="form1">
+<!-- 사이드바 -->
+ <div class="left-side-bar">
+        <div class="status-ico">
+            <span>▶</span>
+            <span>▼</span>
+        </div>
+		<div>
+		관리목록
+		</div>
+        <ul>
+            <li>
+                <a href="/two/home">통계데이터관리</a>
+            </li>
+            <li>
+                <a href="/companyList">제휴사 사이트 관리</a>
+                <ul>
+                	<li><a href="/companySearch">제휴사 사이트 관리 버전2</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+<!-- 사이드바end -->
+<div>
+		<h2>사이트 등록</h2>
+			<table class="type01">
+				<tr>
+					<th scope="row">사이트유형</th>
+						<td>
+							<input type="radio" id="marketing" name="siteType" value="00" checked/>마케팅 제휴사
+							<input type="radio" id="service" name="siteType" value="01"/>서비스 제휴사
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">제휴사</th>
+					<td>
+						<select name="companyId" id="companySelect">
+							<option  th:each="c:${company}" th:value="${c.companyno}" th:text="${c.companynm}"></option>
+						</select>
+						<input type="button" id="registCompany" value="신규제휴사등록"/>
+					</td>
+				</tr>	
+				<tr>
+					<th scope="row">사이트명</th>
+						<td>
+							<input type="text" name="siteName" id="siteName"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트상태</th>
+						<td>
+							<select name="siteStatus" id="statusSelect">
+								<option value="00">정상</option>
+								<option value="01">중지</option>
+								<option value="02">준비중</option>
+							</select>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">정산여부</th>
+						<td>
+							<input type="radio" name="siteCalculate" value="Y"/>N
+							<input type="radio" name="siteCalculate" value="N"/>Y
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트URL</th>
+						<td>
+							<input type="text" name="siteUrl" id="siteUrl" placeholder="http:// https://부터 입력하세요"/>
+							<input type="hidden" name="siteUrlDetail" id="siteUrlDetail"/>
+							<input type="hidden" name="siteProtocol" id="siteProtocol"/>
+						</td>
+				</tr>
+				<tr name="siteGearingUrl">
+					<th scope="row">사이트연동URL</th>
+						<td>
+							<input type="text" name="siteGearingUrl" id="siteGearingUrl" placeholder="http:// https://부터 입력하세요"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">사이트 담당자</th>
+						<td>
+							<input type="text" name="siteManagerName" id="siteManagerName"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">담당자 연락처</th>
+						<td>
+							<input type="text" name="siteManagerNumber" id="siteManagerNumber"/>
+						</td>
+				</tr>
+				<tr>
+					<th scope="row">담당자 이메일</th>
+						<td>
+							<input type="text" name="siteManagerEmail" id="siteManagerEmail"/>
+						</td>
+				</tr>
+			</table>
+		<div>
+			<input type="button" value="등록" id="regist">
+		</div>
+	</div>
+</form>
+	<div id="popup"></div>
+</body>
+</html>
