@@ -288,6 +288,7 @@ public class OrderController {
 			param.put("siteUrlDetail", siteUrlDetail);
 			
 			List<CompanyTable> companyTables= orderservice.selectSearchCompany(param);
+			System.out.println("companyTable= "+companyTables);
 			logger.debug("companyTable = {}",companyTables);
 			
 			if(companyTables.size()<1) {
